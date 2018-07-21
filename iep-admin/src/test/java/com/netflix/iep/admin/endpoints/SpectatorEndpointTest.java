@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,17 @@ package com.netflix.iep.admin.endpoints;
 
 import com.netflix.spectator.api.DefaultRegistry;
 import com.netflix.spectator.api.Registry;
+import com.netflix.spectator.api.patterns.PolledMeter;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 @RunWith(JUnit4.class)
@@ -41,6 +45,7 @@ public class SpectatorEndpointTest {
     registry.distributionSummary("distSummary1", "a", "1").record(47);
 
     registry.gauge("gauge1", 100.0);
+    PolledMeter.update(registry);
   }
 
   @SuppressWarnings("unchecked")
@@ -171,7 +176,13 @@ public class SpectatorEndpointTest {
     List<SpectatorEndpoint.CounterInfo> datapoints = get("name,counter,:re,a,1,:eq,a,2,:eq,:or,:and");
     Assert.assertEquals(2, datapoints.size());
     Assert.assertEquals(3, datapoints.get(0).getTags().size());
-    Assert.assertEquals(42, datapoints.get(0).getCount());
+    Set<Long> actual = datapoints.stream()
+        .map(SpectatorEndpoint.CounterInfo::getCount)
+        .collect(Collectors.toSet());
+    Set<Long> expected = new HashSet<>();
+    expected.add(42L);
+    expected.add(1L);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test

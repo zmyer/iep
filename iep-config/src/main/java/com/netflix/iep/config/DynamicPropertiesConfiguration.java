@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,12 @@ import com.netflix.archaius.api.PropertyFactory;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 
 @Singleton
-public class DynamicPropertiesConfiguration {
+public class DynamicPropertiesConfiguration implements AutoCloseable {
 
   private final IConfiguration instance;
 
@@ -59,8 +58,18 @@ public class DynamicPropertiesConfiguration {
     }
   }
 
-  @PreDestroy
+  /**
+   * @deprecated Use {@link #close()} instead.
+   */
   public void destroy() {
+    try {
+      close();
+    } catch (Exception e) {
+      throw new RuntimeException("failed to shutdown dynamic properties configuration", e);
+    }
+  }
+
+  @Override public void close() throws Exception {
     Configuration.setConfiguration(null);
   }
 }

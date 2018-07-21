@@ -12,6 +12,7 @@ lazy val root = project.in(file("."))
     `iep-module-archaius2`,
     `iep-module-atlas`,
     `iep-module-aws`,
+    `iep-module-aws2`,
     `iep-module-awsmetrics`,
     `iep-module-eureka`,
     `iep-module-jmxport`,
@@ -55,7 +56,8 @@ lazy val `iep-guice` = project
   .settings(libraryDependencies ++= Seq(
     Dependencies.guiceCore,
     Dependencies.guiceMulti,
-    Dependencies.slf4jApi
+    Dependencies.slf4jApi,
+    Dependencies.jsr250 % "test"
   ))
 
 lazy val `iep-launcher` = project
@@ -129,6 +131,30 @@ lazy val `iep-module-aws` = project
     Dependencies.typesafeConfig
   ))
 
+lazy val `iep-module-aws2` = project
+  .configure(BuildSettings.profile)
+  .dependsOn(`iep-nflxenv`)
+  .settings(libraryDependencies ++= Seq(
+    Dependencies.aws2Core,
+    Dependencies.aws2AutoScaling % "test",
+    Dependencies.aws2CloudWatch % "test",
+    Dependencies.aws2DynamoDB % "test",
+    Dependencies.aws2EC2 % "test",
+    Dependencies.aws2ELB % "test",
+    Dependencies.aws2ELBv2 % "test",
+    Dependencies.aws2EMR % "test",
+    Dependencies.aws2Route53 % "test",
+    Dependencies.aws2STS,
+    Dependencies.guiceCore,
+    Dependencies.jacksonCbor,    // Jackson deps are not used directly, here to force 2.9.1
+    Dependencies.jacksonMapper,  // https://bugs.openjdk.java.net/browse/JDK-8186334
+    Dependencies.jacksonJr,
+    Dependencies.reactiveStreams,
+    Dependencies.rxjava2,
+    Dependencies.slf4jApi,
+    Dependencies.typesafeConfig
+  ))
+
 lazy val `iep-module-awsmetrics` = project
   .configure(BuildSettings.profile)
   .settings(libraryDependencies ++= Seq(
@@ -180,6 +206,7 @@ lazy val `iep-module-userservice` = project
 lazy val `iep-nflxenv` = project
   .configure(BuildSettings.profile)
   .settings(libraryDependencies ++= Seq(
+    Dependencies.slf4jApi,
     Dependencies.typesafeConfig
   ))
 
@@ -203,6 +230,7 @@ lazy val `iep-rxhttp` = project
   .settings(libraryDependencies ++= Seq(
     Dependencies.archaiusCore,
     Dependencies.eurekaClient,
+    Dependencies.jsr250,
     Dependencies.jzlib,
     Dependencies.rxjava,
     Dependencies.rxnettyCore,
@@ -216,6 +244,7 @@ lazy val `iep-service` = project
   .configure(BuildSettings.profile)
   .settings(libraryDependencies ++= Seq(
     Dependencies.inject,
+    Dependencies.jsr250,
     Dependencies.slf4jApi
   ))
 

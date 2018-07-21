@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.netflix.iep.admin;
+package com.netflix.iep.admin.guice;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.netflix.iep.admin.HttpEndpoint;
 import com.netflix.iep.admin.endpoints.ReflectEndpoint;
 
 import javax.inject.Inject;

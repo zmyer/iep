@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,12 +72,11 @@ public class AdminServerTest {
     endpoints.put("/bad",  new BadEndpoint());
     endpoints.put("/test", new TestEndpoint());
     server = new AdminServer(config, endpoints);
-    server.start();
   }
 
   @After
-  public void after() {
-    server.stop();
+  public void after() throws Exception {
+    server.close();
   }
 
   private int getUnusedPort() throws IOException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
 package com.netflix.iep.service;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 /**
  * Base class that manages the service state. Just implement the {@link #startImpl()} and
  * {@link #stopImpl()}.
  */
-public abstract class AbstractService implements Service {
+public abstract class AbstractService implements Service, AutoCloseable {
 
   private final String name;
   private volatile State state;
@@ -65,7 +64,6 @@ public abstract class AbstractService implements Service {
     }
   }
 
-  @PreDestroy
   public final synchronized void stop() throws Exception {
     if (state == State.STARTING || state == State.RUNNING) {
       state = State.STOPPING;
@@ -77,6 +75,14 @@ public abstract class AbstractService implements Service {
         throw e;
       }
     }
+  }
+
+  /**
+   * Equivalent to calling {@link #stop()}. This method is used for lifecycle management
+   * with DI frameworks.
+   */
+  @Override public void close() throws Exception {
+    stop();
   }
 
   protected abstract void startImpl() throws Exception;

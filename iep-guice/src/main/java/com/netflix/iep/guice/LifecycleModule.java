@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.netflix.iep.guice;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Scopes;
 import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.ProvisionListener;
 import com.netflix.iep.service.ClassFactory;
@@ -39,7 +40,8 @@ public class LifecycleModule extends AbstractModule {
 
     @Override public <T> void onProvision(ProvisionInvocation<T> provisionInvocation) {
       T value = provisionInvocation.provision();
-      AnnotationUtils.invokePostConstruct(LOGGER, value, preDestroyList);
+      boolean singleton = Scopes.isSingleton(provisionInvocation.getBinding());
+      AnnotationUtils.invokePostConstruct(LOGGER, value, singleton ? preDestroyList : null);
     }
   }
 

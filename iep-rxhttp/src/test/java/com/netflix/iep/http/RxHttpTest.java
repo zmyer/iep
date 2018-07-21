@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,6 @@ public class RxHttpTest {
 
   @BeforeClass
   public static void startServer() throws Exception {
-    rxHttp.start();
 
     server = HttpServer.create(new InetSocketAddress(0), 100);
     server.setExecutor(Executors.newFixedThreadPool(10, r -> new Thread(r, "HttpServer")));
@@ -189,8 +188,8 @@ public class RxHttpTest {
   }
 
   @AfterClass
-  public static void stopServer() {
-    rxHttp.stop();
+  public static void stopServer() throws Exception {
+    rxHttp.close();
     server.stop(0);
   }
 
@@ -612,7 +611,7 @@ public class RxHttpTest {
     set("port-override.niws.client.Port", "2");
     URI origUri = URI.create("niws://port-override/foo");
     URI relUri = URI.create("/foo");
-    ClientConfig cfg = new ClientConfig(archaius, "port-override", "vip", origUri, relUri);
+    ClientConfig cfg = new ClientConfig(archaius, "port-override", "vip", origUri, relUri, null);
     InstanceInfo info = InstanceInfo.Builder.newBuilder()
         .setAppName("foo")
         .setPort(1)
@@ -625,7 +624,7 @@ public class RxHttpTest {
   public void portDefaultSetting() throws Exception {
     URI origUri = URI.create("niws://port-default/foo");
     URI relUri = URI.create("/foo");
-    ClientConfig cfg = new ClientConfig(archaius, "port-default", "vip", origUri, relUri);
+    ClientConfig cfg = new ClientConfig(archaius, "port-default", "vip", origUri, relUri, null);
     InstanceInfo info = InstanceInfo.Builder.newBuilder()
         .setAppName("foo")
         .setPort(1)

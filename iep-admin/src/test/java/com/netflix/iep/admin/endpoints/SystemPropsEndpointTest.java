@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ public class SystemPropsEndpointTest {
 
   @Test @SuppressWarnings("unchecked")
   public void getProperty() {
+    // jdk10+ have a java.version.date property
     Map<String, String> map = (Map<String, String>) endpoint.get("java.version");
-    Assert.assertEquals(1, map.size());
     Assert.assertEquals(System.getProperty("java.version"), map.get("java.version"));
   }
 

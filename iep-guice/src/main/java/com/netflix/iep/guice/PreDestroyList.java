@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,10 @@ public class PreDestroyList {
     int n = cleanupList.size();
     for (int i = n - 1; i >= 0; --i) {
       Object obj = cleanupList.get(i);
+      if (obj instanceof AutoCloseable) {
+        LOGGER.debug("invoking close() for {}", obj.getClass().getName());
+        ((AutoCloseable) obj).close();
+      }
       Method preDestroy = AnnotationUtils.getPreDestroy(obj.getClass());
       if (preDestroy != null) {
         LOGGER.debug("invoking @PreDestroy for {}", obj.getClass().getName());

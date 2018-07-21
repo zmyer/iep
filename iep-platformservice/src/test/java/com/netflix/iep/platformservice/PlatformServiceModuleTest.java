@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2017 Netflix, Inc.
+ * Copyright 2014-2018 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Provides;
 import com.google.inject.util.Modules;
 import com.netflix.archaius.api.Config;
 import com.netflix.archaius.api.config.SettableConfig;
@@ -27,6 +28,8 @@ import com.netflix.archaius.api.inject.RemoteLayer;
 import com.netflix.archaius.api.inject.RuntimeLayer;
 import com.netflix.archaius.config.DefaultSettableConfig;
 import com.netflix.archaius.guice.ArchaiusModule;
+import com.netflix.spectator.api.NoopRegistry;
+import com.netflix.spectator.api.Registry;
 import com.typesafe.config.ConfigFactory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -56,7 +59,7 @@ public class PlatformServiceModuleTest {
   public void loadConfig() {
     PlatformServiceModule m = new PlatformServiceModule();
     com.typesafe.config.Config c = m.providesTypesafeConfig();
-    Assert.assertEquals("main", c.getString("account-specific-prop"));
+    Assert.assertTrue(c.getBoolean("iep.account-config-loaded"));
   }
 
   @Test
@@ -113,6 +116,29 @@ public class PlatformServiceModuleTest {
   public void includesLaterFilesOverride() {
     PlatformServiceModule m = new PlatformServiceModule();
     com.typesafe.config.Config c = m.providesTypesafeConfig();
-    Assert.assertEquals("def:main", c.getString("includes.b"));
+    Assert.assertEquals("def:foo", c.getString("includes.b"));
+  }
+
+  @Test
+  public void registryNeedsConfig() {
+    Module registryModule = new AbstractModule() {
+      @Override protected void configure() {
+      }
+
+      @Provides
+      public Registry providesRegistry(Config cfg) {
+        // Config will be a proxy object and must be accessed to trigger the
+        // failure:
+        //
+        // Caused by: java.lang.IllegalStateException: This is a proxy used to
+        // support circular references. The object we're proxying is not constructed
+        // yet. Please wait until after injection has completed to use this object.
+        Assert.assertTrue(cfg.getBoolean("netflix.iep.archaius.use-dynamic"));
+        return new NoopRegistry();
+      }
+    };
+
+    Injector injector = Guice.createInjector(registryModule, new PlatformServiceModule());
+    Assert.assertTrue(injector.getInstance(Registry.class) instanceof NoopRegistry);
   }
 }
